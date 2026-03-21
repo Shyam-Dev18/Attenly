@@ -8,12 +8,17 @@ import 'features/attendance/presentation/quick_mark_screen.dart';
 import 'features/timetable/presentation/timetable_screen.dart';
 import 'features/calendar/presentation/calendar_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
+import 'features/splash/presentation/splash_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'shared/providers/settings_provider.dart';
 
 final _router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(
+      path: '/splash',
+      builder: (ctx, state) => const SplashScreen(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return _MainScaffold(navigationShell: navigationShell);

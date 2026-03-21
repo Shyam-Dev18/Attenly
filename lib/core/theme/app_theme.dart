@@ -36,6 +36,12 @@ class AppTheme {
         surface: const Color(0xFFF8F8F8),
       ),
       scaffoldBackgroundColor: const Color(0xFFF8F8F8),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
     return base.copyWith(
       textTheme: GoogleFonts.interTextTheme(base.textTheme),
@@ -71,6 +77,12 @@ class AppTheme {
         surface: const Color(0xFF0F0F0F),
       ),
       scaffoldBackgroundColor: const Color(0xFF0F0F0F),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
     return base.copyWith(
       textTheme: GoogleFonts.interTextTheme(base.textTheme),

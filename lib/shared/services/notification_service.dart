@@ -8,13 +8,41 @@ import '../models/timetable_entry.dart';
 import '../models/subject.dart';
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
     tz.initializeTimeZones();
 
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+    // *** FIX 1: Detect the device's local timezone name and set it ***
+    // Without this, tz.local defaults to UTC which makes every notification
+    // fire at the wrong time (or not at all on the same day).
+    try {
+      final String timeZoneName = DateTime.now().timeZoneName;
+      // timeZoneName on Android is like "IST". We try to match it; if not found
+      // we fall back to UTC+offset approach.
+      final locations = tz.timeZoneDatabase.locations;
+      final match = locations.entries.firstWhere(
+        (e) => e.value.currentTimeZone.abbreviation == timeZoneName,
+        orElse: () => locations.entries.first,
+      );
+      tz.setLocalLocation(match.value);
+    } catch (_) {
+      // Fallback: manually offset from UTC using the system offset
+      final offsetSeconds = DateTime.now().timeZoneOffset.inSeconds;
+      // Find a timezone that matches current offset
+      final match = tz.timeZoneDatabase.locations.entries.firstWhere(
+        (e) => e.value.currentTimeZone.offset == offsetSeconds * 1000,
+        orElse: () => tz.timeZoneDatabase.locations.entries
+            .firstWhere((e) => e.key == 'UTC'),
+      );
+      tz.setLocalLocation(match.value);
+    }
+
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
@@ -30,52 +58,67 @@ class NotificationService {
 
   static Future<bool> requestPermissions() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
-        final status = await Permission.notification.request();
-        return status.isGranted;
+      final status = await Permission.notification.request();
+      return status.isGranted;
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-        final bool? result = await _notificationsPlugin
-            .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-            ?.requestPermissions(alert: true, badge: true, sound: true);
-        return result ?? false;
+      final bool? result = await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
+      return result ?? false;
     }
     return false;
   }
 
-  static Future<void> scheduleClassReminders(List<TimetableEntry> entries, List<SubjectModel> subjects) async {
+  static Future<void> scheduleClassReminders(
+      List<TimetableEntry> entries, List<SubjectModel> subjects) async {
     await _notificationsPlugin.cancelAll();
 
     final subjectMap = {for (var s in subjects) s.id: s};
-
     int notificationId = 0;
 
     for (var entry in entries) {
       final subject = subjectMap[entry.subjectId];
       if (subject == null) continue;
 
-      // Class starts at entry.startTime (e.g. "09:00")
-      // We want to remind 10 minutes before
       final parts = entry.startTime.split(':');
-      final hour = int.parse(parts[0]);
-      final minute = int.parse(parts[1]);
+      if (parts.length < 2) continue;
+      final hour = int.tryParse(parts[0]);
+      final minute = int.tryParse(parts[1]);
+      if (hour == null || minute == null) continue;
 
-      // Calculate next occurrence of this weekday
-      DateTime now = DateTime.now();
-      // DateTime weekday: 1=Mon .. 7=Sun
-      int daysUntil = entry.weekday - now.weekday;
-      if (daysUntil < 0 || (daysUntil == 0 && (now.hour > hour || (now.hour == hour && now.minute >= minute)))) {
-        daysUntil += 7; // Next week
+      // *** FIX 2: Use tz-aware now so the comparison is in device local time ***
+      final tzNow = tz.TZDateTime.now(tz.local);
+
+      // entry.weekday: 1=Mon .. 7=Sun (same as DateTime.monday etc.)
+      int daysUntil = entry.weekday - tzNow.weekday;
+      if (daysUntil < 0) {
+        daysUntil += 7;
+      } else if (daysUntil == 0) {
+        // Same weekday — check if the class time (minus 10 min) has already passed today
+        final todayReminder = tz.TZDateTime(
+            tz.local, tzNow.year, tzNow.month, tzNow.day, hour, minute)
+            .subtract(const Duration(minutes: 10));
+        if (tzNow.isAfter(todayReminder)) {
+          daysUntil = 7; // Schedule for next week
+        }
       }
 
-      DateTime nextDate = now.add(Duration(days: daysUntil));
-      DateTime scheduledTime = DateTime(nextDate.year, nextDate.month, nextDate.day, hour, minute);
-      DateTime reminderTime = scheduledTime.subtract(const Duration(minutes: 10));
+      final scheduledDay = tzNow.add(Duration(days: daysUntil));
+      final reminderTime = tz.TZDateTime(
+        tz.local,
+        scheduledDay.year,
+        scheduledDay.month,
+        scheduledDay.day,
+        hour,
+        minute,
+      ).subtract(const Duration(minutes: 10));
 
-      // Don't schedule in the past
-      if (reminderTime.isBefore(DateTime.now())) {
-          reminderTime = reminderTime.add(const Duration(days: 7));
-      }
+      // Safety: never schedule in the past
+      if (reminderTime.isBefore(tzNow)) continue;
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
         'class_reminders',
         'Class Reminders',
         channelDescription: 'Reminders for upcoming classes',
@@ -83,13 +126,14 @@ class NotificationService {
         priority: Priority.high,
       );
 
-      const NotificationDetails details = NotificationDetails(android: androidDetails);
+      const NotificationDetails details =
+          NotificationDetails(android: androidDetails);
 
       await _notificationsPlugin.zonedSchedule(
         notificationId++,
         'Upcoming Class: ${subject.name}',
         'Starts at ${entry.startTime} in 10 minutes. Don\'t forget to mark attendance!',
-        tz.TZDateTime.from(reminderTime, tz.local),
+        reminderTime,
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,

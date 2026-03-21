@@ -31,9 +31,13 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing with the debug keys for now so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // Note: Flutter performs Dart-level tree-shaking and icon/font stripping
+            // which achieves similar results to R8 for Dart code. R8 is disabled
+            // here to avoid conflicts with Flutter's native build pipeline.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

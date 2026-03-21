@@ -223,14 +223,23 @@ class _SubjectSheetState extends ConsumerState<_SubjectSheet> {
                 onPressed: () async {
                   final name = _nameCtrl.text.trim();
                   if (name.isEmpty) return;
-                  if (widget.existing == null) {
-                    await ref.read(subjectsProvider.notifier).addSubject(
-                      name: name, colorHex: _selectedColor, goal: _goal.toInt());
-                  } else {
-                    await ref.read(subjectsProvider.notifier).editSubject(
-                      widget.existing!, name: name, colorHex: _selectedColor, goal: _goal.toInt());
+                  try {
+                    if (widget.existing == null) {
+                      await ref.read(subjectsProvider.notifier).addSubject(
+                        name: name, colorHex: _selectedColor, goal: _goal.toInt());
+                    } else {
+                      await ref.read(subjectsProvider.notifier).editSubject(
+                        widget.existing!, name: name, colorHex: _selectedColor, goal: _goal.toInt());
+                    }
+                    if (context.mounted) context.pop();
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(e.toString().replaceAll('Exception: ', '')),
+                        backgroundColor: kAbsent,
+                      ));
+                    }
                   }
-                  if (context.mounted) context.pop();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: kPrimary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 child: Text(widget.existing == null ? 'Add Subject' : 'Save Changes', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),

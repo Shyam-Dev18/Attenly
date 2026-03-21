@@ -396,8 +396,17 @@ class _EditSubjectSheetState extends ConsumerState<_EditSubjectSheet> {
                 onPressed: () async {
                   final name = _nameCtrl.text.trim();
                   if (name.isEmpty) return;
-                  await ref.read(subjectsProvider.notifier).editSubject(widget.subject, name: name, colorHex: _selectedColor, goal: _goal.toInt());
-                  if (context.mounted) context.pop();
+                  try {
+                    await ref.read(subjectsProvider.notifier).editSubject(widget.subject, name: name, colorHex: _selectedColor, goal: _goal.toInt());
+                    if (context.mounted) context.pop();
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(e.toString().replaceAll('Exception: ', '')),
+                        backgroundColor: kAbsent,
+                      ));
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: kPrimary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),

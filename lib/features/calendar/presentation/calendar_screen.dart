@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart' hide isSameDay;
 import '../../../shared/providers/attendance_provider.dart';
 import '../../../shared/providers/subjects_provider.dart';
@@ -136,7 +137,7 @@ class _DayLogTile extends ConsumerWidget {
             const SizedBox(width: 4),
             GestureDetector(
               onTap: () async {
-                final confirm = await showDialog<bool>(context: context, builder: (_) => AlertDialog(title: const Text('Delete record?'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: kAbsent)))]));
+                final confirm = await showDialog<bool>(context: context, builder: (_) => AlertDialog(title: const Text('Delete record?'), actions: [TextButton(onPressed: () => context.pop(false), child: const Text('Cancel')), TextButton(onPressed: () => context.pop(true), child: const Text('Delete', style: TextStyle(color: kAbsent)))]));
                 if (confirm == true) ref.read(attendanceProvider.notifier).deleteRecord(record);
               },
               child: _EditChip(label: '🗑', color: kAbsent, active: false),

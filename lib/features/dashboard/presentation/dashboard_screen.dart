@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../shared/providers/subjects_provider.dart';
 import '../../../shared/providers/attendance_provider.dart';
 import '../../../shared/providers/settings_provider.dart';
@@ -30,7 +31,8 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Attenly', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Attenly', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26, letterSpacing: -0.5))
+            .animate().fade(duration: 500.ms).slideX(begin: -0.1),
         centerTitle: false,
         actions: [
           IconButton(
@@ -41,7 +43,7 @@ class DashboardScreen extends ConsumerWidget {
       ),
       floatingActionButton: AttendanceFab(onPressed: () => context.push('/quick-mark')),
       body: subjects.isEmpty
-          ? _buildOnboarding(context)
+          ? _buildOnboarding(context).animate().fade(duration: 500.ms).scale(begin: const Offset(0.95, 0.95))
           : RefreshIndicator(
               onRefresh: () async {
                 ref.read(subjectsProvider.notifier).refreshSubjects();
@@ -51,7 +53,8 @@ class DashboardScreen extends ConsumerWidget {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      child: _buildOverallCard(context, overallPct, color, subjects.length),
+                      child: _buildOverallCard(context, overallPct, color, subjects.length)
+                          .animate().fade(duration: 500.ms, delay: 100.ms).scale(begin: const Offset(0.97, 0.97)),
                     ),
                   ),
                   SliverPadding(
@@ -64,7 +67,7 @@ class DashboardScreen extends ConsumerWidget {
                           child: SubjectCard(
                             subject: sub,
                             onTap: () => context.push('/subjects/${sub.id}'),
-                          ),
+                          ).animate().fade(duration: 400.ms, delay: (150 + (i * 50)).ms).slideY(begin: 0.1),
                         );
                       }, childCount: subjects.length),
                     ),

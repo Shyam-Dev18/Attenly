@@ -24,6 +24,9 @@ class SubjectsNotifier extends StateNotifier<List<SubjectModel>> {
     required String colorHex,
     required int goal,
   }) async {
+    if (state.any((s) => s.name.trim().toLowerCase() == name.trim().toLowerCase())) {
+      throw Exception('A subject with this name already exists.');
+    }
     final sub = SubjectModel()
       ..id = _uuid.v4()
       ..name = name
@@ -38,6 +41,9 @@ class SubjectsNotifier extends StateNotifier<List<SubjectModel>> {
     required String colorHex,
     required int goal,
   }) async {
+    if (state.any((s) => s.id != sub.id && s.name.trim().toLowerCase() == name.trim().toLowerCase())) {
+      throw Exception('A subject with this name already exists.');
+    }
     sub.name = name;
     sub.colorHex = colorHex;
     sub.attendanceGoal = goal;
