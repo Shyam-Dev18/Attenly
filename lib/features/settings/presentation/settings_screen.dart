@@ -5,6 +5,7 @@ import '../../../shared/providers/subjects_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/services/export_service.dart';
 import '../../../shared/providers/attendance_provider.dart';
+import '../../../shared/services/notification_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -61,12 +62,29 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _SectionHeader('Notifications'),
           Card(
-            child: SwitchListTile(
-              title: const Text('Enable Notifications'),
-              subtitle: const Text('Reminders 10 min before class'),
-              value: settings.notificationsEnabled,
-              activeThumbColor: kPrimary,
-              onChanged: (v) => notifier.setNotifications(v),
+            child: Column(
+              children: [
+                SwitchListTile(
+                  title: const Text('Enable Notifications'),
+                  subtitle: const Text('Reminders 10 min before class'),
+                  value: settings.notificationsEnabled,
+                  activeThumbColor: kPrimary,
+                  onChanged: (v) => notifier.setNotifications(v),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  title: const Text('Test Notification'),
+                  subtitle: const Text('Send a test reminder right now'),
+                  leading: const Icon(Icons.notifications_active_outlined),
+                  onTap: () async {
+                    if (!settings.notificationsEnabled) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enable notifications first.')));
+                      return;
+                    }
+                    await NotificationService.testNotification();
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

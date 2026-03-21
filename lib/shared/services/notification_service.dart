@@ -59,6 +59,9 @@ class NotificationService {
   static Future<bool> requestPermissions() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
       final status = await Permission.notification.request();
+      final androidPlugin = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      await androidPlugin?.requestExactAlarmsPermission();
       return status.isGranted;
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       final bool? result = await _notificationsPlugin
@@ -143,5 +146,21 @@ class NotificationService {
 
   static Future<void> cancelAll() async {
     await _notificationsPlugin.cancelAll();
+  }
+
+  static Future<void> testNotification() async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'test_reminders',
+      'Test Notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails details = NotificationDetails(android: androidDetails);
+    await _notificationsPlugin.show(
+      999,
+      'Test Notification',
+      'Notifications and exact alarms are working perfectly!',
+      details,
+    );
   }
 }
