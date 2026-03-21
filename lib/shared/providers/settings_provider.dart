@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../services/hive_service.dart';
+import '../services/notification_service.dart';
+import 'timetable_provider.dart';
+import 'subjects_provider.dart';
 
 class SettingsState {
   final int globalGoal;
@@ -23,10 +26,12 @@ class SettingsState {
 }
 
 final settingsProvider =
-    StateNotifierProvider<SettingsNotifier, SettingsState>((ref) => SettingsNotifier());
+    StateNotifierProvider<SettingsNotifier, SettingsState>((ref) => SettingsNotifier(ref));
 
 class SettingsNotifier extends StateNotifier<SettingsState> {
-  SettingsNotifier() : super(const SettingsState()) {
+  final Ref _ref;
+
+  SettingsNotifier(this._ref) : super(const SettingsState()) {
     _load();
   }
 
@@ -47,6 +52,15 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> setNotifications(bool enabled) async {
     await HiveService.settings.put(AppConstants.notificationsKey, enabled);
     state = state.copyWith(notificationsEnabled: enabled);
+    
+    if (enabled) {
+      await NotificationService.requestPermissions();
+      final timetable = _ref.read(timetableProvider);
+      final subjects = _ref.read(subjectsProvider);
+      await NotificationService.scheduleClassReminders(timetable, subjects);
+    } else {
+      await NotificationService.cancelAll();
+    }
   }
 
   Future<void> setThemeMode(String mode) async {

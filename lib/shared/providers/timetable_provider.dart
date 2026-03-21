@@ -2,16 +2,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../models/timetable_entry.dart';
 import '../services/hive_service.dart';
+import '../services/notification_service.dart';
+import 'subjects_provider.dart';
+import 'settings_provider.dart';
 
 final timetableProvider =
     StateNotifierProvider<TimetableNotifier, List<TimetableEntry>>(
-  (ref) => TimetableNotifier(),
+  (ref) => TimetableNotifier(ref),
 );
 
 class TimetableNotifier extends StateNotifier<List<TimetableEntry>> {
+  final Ref _ref;
   final _uuid = const Uuid();
 
-  TimetableNotifier() : super([]) {
+  TimetableNotifier(this._ref) : super([]) {
     _load();
   }
 
@@ -38,6 +42,7 @@ class TimetableNotifier extends StateNotifier<List<TimetableEntry>> {
       ..endTime = endTime;
     await HiveService.timetable.put(entry.id, entry);
     _load();
+    _rescheduleNotifications();
   }
 
   Future<void> editEntry(TimetableEntry entry, {
@@ -52,11 +57,27 @@ class TimetableNotifier extends StateNotifier<List<TimetableEntry>> {
     entry.endTime = endTime;
     await entry.save();
     _load();
+    _rescheduleNotifications();
   }
 
   Future<void> deleteEntry(String id) async {
     await HiveService.timetable.delete(id);
     _load();
+    _rescheduleNotifications();
+  }
+
+  Future<void> _rescheduleNotifications() async {
+    final settings = _ref.read(settingsProvider);
+    if (!settings.notificationsEnabled) {
+      await NotificationService.cancelAll();
+      return;
+    }
+    
+    // Request permissions if first time scheduling
+    await NotificationService.requestPermissions();
+    
+    final subjects = _ref.read(subjectsProvider);
+    await NotificationService.scheduleClassReminders(state, subjects);
   }
 
   List<TimetableEntry> entriesForWeekday(int weekday) {

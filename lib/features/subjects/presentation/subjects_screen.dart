@@ -39,8 +39,14 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
                 return Dismissible(
                   key: Key(sub.id),
                   direction: DismissDirection.endToStart,
-                  confirmDismiss: (_) => _confirmDelete(context, sub.name),
-                  onDismissed: (_) => ref.read(subjectsProvider.notifier).deleteSubject(sub.id),
+                  confirmDismiss: (_) async {
+                    final confirmed = await _confirmDelete(context, sub.name);
+                    if (confirmed == true) {
+                      await ref.read(subjectsProvider.notifier).deleteSubject(sub.id);
+                      return true;
+                    }
+                    return false;
+                  },
                   background: Container(
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 20),
@@ -68,9 +74,9 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
         title: const Text('Delete Subject?'),
         content: Text('Delete "$name"? All attendance records for this subject will also be removed.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => context.pop(false), child: const Text('Cancel')),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => context.pop(true),
             child: const Text('Delete', style: TextStyle(color: kAbsent)),
           ),
         ],
@@ -224,7 +230,7 @@ class _SubjectSheetState extends ConsumerState<_SubjectSheet> {
                     await ref.read(subjectsProvider.notifier).editSubject(
                       widget.existing!, name: name, colorHex: _selectedColor, goal: _goal.toInt());
                   }
-                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) context.pop();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: kPrimary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 child: Text(widget.existing == null ? 'Add Subject' : 'Save Changes', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),

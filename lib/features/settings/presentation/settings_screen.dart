@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/providers/settings_provider.dart';
 import '../../../shared/providers/subjects_provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/services/export_service.dart';
+import '../../../shared/providers/attendance_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -70,10 +72,26 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _SectionHeader('Data'),
           Card(
-            child: ListTile(
-              title: const Text('Reset All Data', style: TextStyle(color: kAbsent, fontWeight: FontWeight.bold)),
-              leading: const Icon(Icons.delete_forever_outlined, color: kAbsent),
-              onTap: () => _confirmReset(context, ref),
+            child: Column(
+              children: [
+                ListTile(
+                  title: const Text('Export Attendance (Excel)'),
+                  leading: const Icon(Icons.file_download_outlined),
+                  onTap: () async {
+                    final subjects = ref.read(subjectsProvider);
+                    final records = ref.read(attendanceProvider);
+                    // Show simple snackbar
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Generating Excel file...')));
+                    await ExportService.exportAttendanceToExcel(subjects, records);
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  title: const Text('Reset All Data', style: TextStyle(color: kAbsent, fontWeight: FontWeight.bold)),
+                  leading: const Icon(Icons.delete_forever_outlined, color: kAbsent),
+                  onTap: () => _confirmReset(context, ref),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

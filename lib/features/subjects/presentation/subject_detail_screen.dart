@@ -397,7 +397,7 @@ class _EditSubjectSheetState extends ConsumerState<_EditSubjectSheet> {
                   final name = _nameCtrl.text.trim();
                   if (name.isEmpty) return;
                   await ref.read(subjectsProvider.notifier).editSubject(widget.subject, name: name, colorHex: _selectedColor, goal: _goal.toInt());
-                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) context.pop();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: kPrimary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -469,7 +469,7 @@ class _AddRecordSheetState extends ConsumerState<_AddRecordSheet> {
               child: ElevatedButton(
                 onPressed: () async {
                   await ref.read(attendanceProvider.notifier).markAttendance(subjectId: widget.subjectId, date: _selectedDate, status: _status);
-                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) context.pop();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: kPrimary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 child: const Text('Save Record', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),

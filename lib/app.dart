@@ -14,13 +14,43 @@ import 'shared/providers/settings_provider.dart';
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
-    ShellRoute(
-      builder: (ctx, state, child) => _MainScaffold(child: child, location: state.matchedLocation),
-      routes: [
-        GoRoute(path: '/', builder: (ctx, state) => const DashboardScreen()),
-        GoRoute(path: '/subjects', builder: (ctx, state) => const SubjectsScreen()),
-        GoRoute(path: '/timetable', builder: (ctx, state) => const TimetableScreen()),
-        GoRoute(path: '/calendar', builder: (ctx, state) => const CalendarScreen()),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return _MainScaffold(navigationShell: navigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (ctx, state) => const DashboardScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/subjects',
+              builder: (ctx, state) => const SubjectsScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/timetable',
+              builder: (ctx, state) => const TimetableScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/calendar',
+              builder: (ctx, state) => const CalendarScreen(),
+            ),
+          ],
+        ),
       ],
     ),
     // Detail / overlay screens pushed ON TOP with their own back button
@@ -56,29 +86,22 @@ class AttenlyApp extends ConsumerWidget {
   }
 }
 
-// Routes that show the bottom nav bar
-const _shellRoutes = ['/', '/subjects', '/timetable', '/calendar'];
-
 class _MainScaffold extends StatelessWidget {
-  final Widget child;
-  final String location;
-  const _MainScaffold({required this.child, required this.location});
+  final StatefulNavigationShell navigationShell;
 
-  int get _selectedIndex {
-    if (location.startsWith('/subjects')) return 1;
-    if (location.startsWith('/timetable')) return 2;
-    if (location.startsWith('/calendar')) return 3;
-    return 0;
-  }
+  const _MainScaffold({required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
+      body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
+        selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (i) {
-          context.go(_shellRoutes[i]);
+          navigationShell.goBranch(
+            i,
+            initialLocation: i == navigationShell.currentIndex,
+          );
         },
         destinations: const [
           NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Home'),
