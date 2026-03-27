@@ -29,13 +29,18 @@ android {
         multiDexEnabled = true
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = "attenly-key"
+            keyPassword = "attenly123"
+            storeFile = file("attenly-release.jks")
+            storePassword = "attenly123"
+        }
+    }
+
     buildTypes {
         release {
-            // Signing with the debug keys for now so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
-            // Note: Flutter performs Dart-level tree-shaking and icon/font stripping
-            // which achieves similar results to R8 for Dart code. R8 is disabled
-            // here to avoid conflicts with Flutter's native build pipeline.
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
         }
