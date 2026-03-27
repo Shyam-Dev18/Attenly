@@ -2,7 +2,7 @@
 
 ## Download Latest Release
 
-⭐ **Get the latest version from [GitHub Releases](https://github.com/Shyam-Dev18/Attenly/releases)**
+⭐ **Direct download (recommended): [attenly-v1.1.1-arm64.apk](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-arm64.apk)**
 
 ---
 
@@ -36,11 +36,11 @@ Or open **Settings** → **About Phone** and check:
 
 ### Step 2: Download the Correct APK
 
-| Architecture               | Download Link                                                            | Best For                          | File Size |
-| -------------------------- | ------------------------------------------------------------------------ | --------------------------------- | --------- |
-| **ARM64 (⭐ RECOMMENDED)** | [Latest Release](https://github.com/Shyam-Dev18/Attenly/releases/latest) | 99% of modern Android phones      | ~19 MB    |
-| **ARM v7**                 | [Latest Release](https://github.com/Shyam-Dev18/Attenly/releases/latest) | Older 32-bit Android devices      | ~16.5 MB  |
-| **x86_64**                 | [Latest Release](https://github.com/Shyam-Dev18/Attenly/releases/latest) | Android emulators and x86 tablets | ~20.5 MB  |
+| Architecture               | Download Link                                                                                                         | Best For                          | File Size |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------- |
+| **ARM64 (⭐ RECOMMENDED)** | [Download](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-arm64.apk)  | 99% of modern Android phones      | ~19 MB    |
+| **ARM v7**                 | [Download](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-armv7.apk)  | Older 32-bit Android devices      | ~16.5 MB  |
+| **x86_64**                 | [Download](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-x86_64.apk) | Android emulators and x86 tablets | ~20.5 MB  |
 
 ### Step 3: Install the APK
 
