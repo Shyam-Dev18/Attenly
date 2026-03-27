@@ -37,7 +37,7 @@ Built natively with **Flutter** and utilizing **Hive NoSQL** for local persisten
 
 ### 🤖 Android (Recommended)
 
-**⭐ [Download Latest APK (ARM64)](https://github.com/Shyam-Dev18/Attenly/raw/main/attenly_app/releases/attenly-v1.1.1-arm64.apk)**
+**⭐ [Download Latest APK (ARM64)](https://github.com/Shyam-Dev18/Attenly/raw/main/releases/attenly-v1.1.1-arm64.apk)**
 
 The app provides optimized APKs for different device architectures:
 
