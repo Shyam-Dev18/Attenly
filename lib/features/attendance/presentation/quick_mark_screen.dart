@@ -28,7 +28,6 @@ class _QuickMarkScreenState extends ConsumerState<QuickMarkScreen> {
   Widget build(BuildContext context) {
     final subjects = ref.watch(subjectsProvider);
     final timetable = ref.watch(timetableProvider);
-    final allRecords = ref.watch(attendanceProvider);
     final todayEntries = timetable.where((e) => e.weekday == _selectedDate.weekday).map((e) => e.subjectId).toSet();
 
     // Show timetable subjects first if any, then rest
@@ -36,6 +35,8 @@ class _QuickMarkScreenState extends ConsumerState<QuickMarkScreen> {
       ...subjects.where((s) => todayEntries.contains(s.id)),
       ...subjects.where((s) => !todayEntries.contains(s.id)),
     ];
+    final scheduledSubjects =
+        orderedSubjects.where((subject) => todayEntries.contains(subject.id)).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +77,7 @@ class _QuickMarkScreenState extends ConsumerState<QuickMarkScreen> {
                     },
                   ),
                 ),
-                _MarkAllBar(subjects: orderedSubjects, date: _selectedDate),
+                _MarkAllBar(subjects: scheduledSubjects, date: _selectedDate),
               ],
             ),
     );
@@ -204,16 +205,30 @@ class _MarkAllBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDisabled = subjects.isEmpty;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
       child: ElevatedButton.icon(
-        onPressed: () async {
+        onPressed: isDisabled
+            ? null
+            : () async {
+          final messenger = ScaffoldMessenger.of(context);
+          int affected = 0;
           for (final sub in subjects) {
             await ref.read(attendanceProvider.notifier).markAttendance(subjectId: sub.id, date: date, status: 'present');
+            affected++;
+          }
+          if (context.mounted) {
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('Marked $affected scheduled subject${affected == 1 ? '' : 's'} present.'),
+              ),
+            );
           }
         },
         icon: const Icon(Icons.done_all),
-        label: const Text('Mark All Present'),
+        label: Text(isDisabled ? 'No Classes Scheduled' : 'Mark Scheduled As Present'),
         style: ElevatedButton.styleFrom(
           backgroundColor: kPresent,
           foregroundColor: Colors.white,

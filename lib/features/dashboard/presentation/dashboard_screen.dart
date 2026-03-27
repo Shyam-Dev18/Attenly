@@ -5,8 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../shared/providers/subjects_provider.dart';
 import '../../../shared/providers/attendance_provider.dart';
 import '../../../shared/providers/settings_provider.dart';
-import '../../../shared/models/subject.dart';
-import '../../../shared/models/attendance_record.dart';
+import '../../../shared/providers/timetable_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/utils.dart';
 import '../../../shared/widgets/subject_card.dart';
@@ -19,6 +18,15 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final subjects = ref.watch(subjectsProvider);
     final settings = ref.watch(settingsProvider);
+    final attendanceRecords = ref.watch(attendanceProvider);
+    final timetable = ref.watch(timetableProvider);
+    final today = dateOnly(DateTime.now());
+    final currentStatusBySubject = <String, String>{};
+    for (final record in attendanceRecords) {
+      if (isSameDay(record.date, today)) {
+        currentStatusBySubject[record.subjectId] = record.status;
+      }
+    }
 
     double overallPct = 0;
     if (subjects.isNotEmpty) {
@@ -41,7 +49,41 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: AttendanceFab(onPressed: () => context.push('/quick-mark')),
+      floatingActionButton: AttendanceFab(
+        onPressed: () async {
+          final scheduledIds = timetable
+              .where((entry) => entry.weekday == today.weekday)
+              .map((entry) => entry.subjectId)
+              .toSet();
+          final scheduledSubjects =
+              subjects.where((subject) => scheduledIds.contains(subject.id)).toList();
+
+          if (scheduledSubjects.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No classes scheduled for today.')),
+            );
+            return;
+          }
+
+          for (final subject in scheduledSubjects) {
+            await ref.read(attendanceProvider.notifier).markAttendance(
+              subjectId: subject.id,
+              date: today,
+              status: 'present',
+            );
+          }
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Marked ${scheduledSubjects.length} scheduled subject${scheduledSubjects.length == 1 ? '' : 's'} present.',
+                ),
+              ),
+            );
+          }
+        },
+      ),
       body: subjects.isEmpty
           ? _buildOnboarding(context).animate().fade(duration: 500.ms).scale(begin: const Offset(0.95, 0.95))
           : RefreshIndicator(
@@ -67,6 +109,28 @@ class DashboardScreen extends ConsumerWidget {
                           child: SubjectCard(
                             subject: sub,
                             onTap: () => context.push('/subjects/${sub.id}'),
+                            currentStatus: currentStatusBySubject[sub.id],
+                            onMarkPresent: () async {
+                              await ref.read(attendanceProvider.notifier).markAttendance(
+                                subjectId: sub.id,
+                                date: today,
+                                status: 'present',
+                              );
+                            },
+                            onMarkAbsent: () async {
+                              await ref.read(attendanceProvider.notifier).markAttendance(
+                                subjectId: sub.id,
+                                date: today,
+                                status: 'absent',
+                              );
+                            },
+                            onMarkCancelled: () async {
+                              await ref.read(attendanceProvider.notifier).markAttendance(
+                                subjectId: sub.id,
+                                date: today,
+                                status: 'cancelled',
+                              );
+                            },
                           ).animate().fade(duration: 400.ms, delay: (150 + (i * 50)).ms).slideY(begin: 0.1),
                         );
                       }, childCount: subjects.length),

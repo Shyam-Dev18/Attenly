@@ -3,24 +3,44 @@ import 'package:path_provider/path_provider.dart';
 import '../models/subject.dart';
 import '../models/attendance_record.dart';
 import '../models/timetable_entry.dart';
-import 'package:flutter/foundation.dart';
 
 class HiveService {
   static const String subjectsBox = 'subjects';
   static const String attendanceBox = 'attendance';
   static const String timetableBox = 'timetable';
   static const String settingsBox = 'settings';
+  static bool _initialized = false;
 
   static Future<void> init() async {
+    if (_initialized) return;
+
     final dir = await getApplicationDocumentsDirectory();
     await Hive.initFlutter(dir.path);
-    Hive.registerAdapter(SubjectModelAdapter());
-    Hive.registerAdapter(AttendanceRecordAdapter());
-    Hive.registerAdapter(TimetableEntryAdapter());
-    await Hive.openBox<SubjectModel>(subjectsBox);
-    await Hive.openBox<AttendanceRecord>(attendanceBox);
-    await Hive.openBox<TimetableEntry>(timetableBox);
-    await Hive.openBox(settingsBox);
+
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(SubjectModelAdapter());
+    }
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(AttendanceRecordAdapter());
+    }
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(TimetableEntryAdapter());
+    }
+
+    if (!Hive.isBoxOpen(subjectsBox)) {
+      await Hive.openBox<SubjectModel>(subjectsBox);
+    }
+    if (!Hive.isBoxOpen(attendanceBox)) {
+      await Hive.openBox<AttendanceRecord>(attendanceBox);
+    }
+    if (!Hive.isBoxOpen(timetableBox)) {
+      await Hive.openBox<TimetableEntry>(timetableBox);
+    }
+    if (!Hive.isBoxOpen(settingsBox)) {
+      await Hive.openBox(settingsBox);
+    }
+
+    _initialized = true;
   }
 
   static Box<SubjectModel> get subjects => Hive.box<SubjectModel>(subjectsBox);

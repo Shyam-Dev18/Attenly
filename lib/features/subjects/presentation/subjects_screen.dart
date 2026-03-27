@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/providers/subjects_provider.dart';
+import '../../../shared/providers/attendance_provider.dart';
 import '../../../shared/models/subject.dart';
+import '../../../shared/widgets/subject_card.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/utils.dart';
 
 class SubjectsScreen extends ConsumerStatefulWidget {
   const SubjectsScreen({super.key});
@@ -16,6 +19,14 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
   @override
   Widget build(BuildContext context) {
     final subjects = ref.watch(subjectsProvider);
+    final attendanceRecords = ref.watch(attendanceProvider);
+    final today = dateOnly(DateTime.now());
+    final currentStatusBySubject = <String, String>{};
+    for (final record in attendanceRecords) {
+      if (isSameDay(record.date, today)) {
+        currentStatusBySubject[record.subjectId] = record.status;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -56,10 +67,32 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
                     ),
                     child: const Icon(Icons.delete_outline, color: Colors.white),
                   ),
-                  child: _SubjectListTile(
+                  child: SubjectCard(
                     subject: sub,
                     onTap: () => context.push('/subjects/${sub.id}'),
                     onEdit: () => _showSubjectSheet(context, ref, sub),
+                    currentStatus: currentStatusBySubject[sub.id],
+                    onMarkPresent: () async {
+                      await ref.read(attendanceProvider.notifier).markAttendance(
+                        subjectId: sub.id,
+                        date: today,
+                        status: 'present',
+                      );
+                    },
+                    onMarkAbsent: () async {
+                      await ref.read(attendanceProvider.notifier).markAttendance(
+                        subjectId: sub.id,
+                        date: today,
+                        status: 'absent',
+                      );
+                    },
+                    onMarkCancelled: () async {
+                      await ref.read(attendanceProvider.notifier).markAttendance(
+                        subjectId: sub.id,
+                        date: today,
+                        status: 'cancelled',
+                      );
+                    },
                   ),
                 );
               },
@@ -80,35 +113,6 @@ class _SubjectsScreenState extends ConsumerState<SubjectsScreen> {
             child: const Text('Delete', style: TextStyle(color: kAbsent)),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SubjectListTile extends StatelessWidget {
-  final SubjectModel subject;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-
-  const _SubjectListTile({required this.subject, required this.onTap, required this.onEdit});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = hexToColor(subject.colorHex);
-    return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(backgroundColor: color, child: Text(subject.name[0].toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-        title: Text(subject.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('${subject.percentage.toStringAsFixed(1)}% attended · Target: ${subject.attendanceGoal}%', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(icon: const Icon(Icons.edit_outlined, size: 20), onPressed: onEdit),
-            const Icon(Icons.chevron_right),
-          ],
-        ),
-        onTap: onTap,
       ),
     );
   }
@@ -252,7 +256,3 @@ class _SubjectSheetState extends ConsumerState<_SubjectSheet> {
   }
 }
 
-Color hexToColor(String hex) {
-  final hexCode = hex.replaceAll('#', '');
-  return Color(int.parse('FF$hexCode', radix: 16));
-}

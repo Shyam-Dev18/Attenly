@@ -11,8 +11,8 @@ class AttendanceFab extends StatelessWidget {
       onPressed: onPressed,
       backgroundColor: kPrimary,
       foregroundColor: Colors.white,
-      icon: const Icon(Icons.check_circle_outline),
-      label: const Text('Mark Attendance'),
+      icon: const Icon(Icons.done_all),
+      label: const Text('Mark All Present'),
     );
   }
 }
