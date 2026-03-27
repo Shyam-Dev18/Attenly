@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 1800), () {
+    Future.delayed(const Duration(milliseconds: 2400), () {
       if (mounted) context.go('/');
     });
   }
@@ -23,21 +23,43 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kPrimary,
-      body: Center(
-        child: const Text(
-          'Attenly',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 56,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -1.5,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 58,
+                backgroundColor: Colors.white.withValues(alpha: 0.14),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/icon/icon.png',
+                    width: 82,
+                    height: 82,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+                  .animate()
+                  .fadeIn(duration: 700.ms, curve: Curves.easeOut)
+                  .scale(begin: const Offset(0.78, 0.78), duration: 700.ms, curve: Curves.easeOutBack),
+              const SizedBox(height: 22),
+              const Text(
+                'Attenly',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 54,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1.2,
+                  height: 1,
+                ),
+              )
+                  .animate()
+                  .fadeIn(duration: 750.ms, delay: 120.ms)
+                  .slideY(begin: 0.14, end: 0, duration: 750.ms, curve: Curves.easeOutCubic),
+            ],
           ),
-        )
-        .animate()
-        .fadeIn(duration: 800.ms, curve: Curves.easeOut)
-        .slideY(begin: 0.1, end: 0, duration: 800.ms, curve: Curves.easeOutBack)
-        .then(delay: 500.ms)
-        .fadeOut(duration: 400.ms),
+        ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart' hide isSameDay;
 import '../../../shared/providers/attendance_provider.dart';
 import '../../../shared/providers/subjects_provider.dart';
 import '../../../shared/models/attendance_record.dart';
+import '../../../shared/models/subject.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/utils.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +36,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final allRecords = ref.watch(attendanceProvider);
+    final subjects = ref.watch(subjectsProvider);
 
     Map<DateTime, List<AttendanceRecord>> grouped = {};
     for (final r in allRecords) {
@@ -47,6 +49,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar', style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: subjects.isEmpty
+            ? null
+            : () => _showAddRecord(context, subjects),
+        icon: const Icon(Icons.add_circle_outline),
+        label: const Text('Add Record'),
+        backgroundColor: kPrimary,
+        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -99,6 +110,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAddRecord(BuildContext context, List<SubjectModel> subjects) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CalendarAddRecordSheet(
+        initialDate: _selectedDay ?? dateOnly(DateTime.now()),
       ),
     );
   }
@@ -165,6 +187,169 @@ class _EditChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(color: active ? color.withValues(alpha: 0.2) : Colors.transparent, borderRadius: BorderRadius.circular(6), border: Border.all(color: color.withValues(alpha: 0.4))),
       child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)),
+    );
+  }
+}
+
+class _CalendarAddRecordSheet extends ConsumerStatefulWidget {
+  final DateTime initialDate;
+  const _CalendarAddRecordSheet({required this.initialDate});
+
+  @override
+  ConsumerState<_CalendarAddRecordSheet> createState() => _CalendarAddRecordSheetState();
+}
+
+class _CalendarAddRecordSheetState extends ConsumerState<_CalendarAddRecordSheet> {
+  late DateTime _selectedDate;
+  String? _subjectId;
+  String _status = 'present';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = dateOnly(widget.initialDate);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subjects = ref.watch(subjectsProvider);
+    _subjectId ??= subjects.isNotEmpty ? subjects.first.id : null;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Add Attendance Record', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              initialValue: _subjectId,
+              decoration: const InputDecoration(labelText: 'Subject'),
+              items: subjects
+                  .map((s) => DropdownMenuItem<String>(
+                        value: s.id,
+                        child: Text(s.name),
+                      ))
+                  .toList(),
+              onChanged: (value) => setState(() => _subjectId = value),
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                );
+                if (picked != null) {
+                  setState(() => _selectedDate = dateOnly(picked));
+                }
+              },
+              child: InputDecorator(
+                decoration: const InputDecoration(labelText: 'Date', prefixIcon: Icon(Icons.calendar_today)),
+                child: Text(DateFormat('EEE, d MMM y').format(_selectedDate)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _StatusSelectChip(label: 'P', color: kPresent, active: _status == 'present', onTap: () => setState(() => _status = 'present')),
+                const SizedBox(width: 6),
+                _StatusSelectChip(label: 'A', color: kAbsent, active: _status == 'absent', onTap: () => setState(() => _status = 'absent')),
+                const SizedBox(width: 6),
+                _StatusSelectChip(label: 'C', color: kCancelled, active: _status == 'cancelled', onTap: () => setState(() => _status = 'cancelled')),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _subjectId == null
+                    ? null
+                    : () async {
+                        await ref.read(attendanceProvider.notifier).markAttendance(
+                              subjectId: _subjectId!,
+                              date: _selectedDate,
+                              status: _status,
+                            );
+                        if (context.mounted) {
+                          context.pop();
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('Save Record', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusSelectChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool active;
+  final VoidCallback onTap;
+
+  const _StatusSelectChip({
+    required this.label,
+    required this.color,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: active ? color.withValues(alpha: 0.2) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withValues(alpha: 0.4)),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

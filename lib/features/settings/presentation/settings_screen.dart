@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../shared/providers/settings_provider.dart';
 import '../../../shared/providers/subjects_provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -9,6 +10,12 @@ import '../../../shared/services/notification_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  static final Uri _repoUri = Uri.parse('https://github.com/Shyam-Dev18/Attenly');
+
+  Future<void> _openRepo() async {
+    await launchUrl(_repoUri, mode: LaunchMode.externalApplication);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -110,6 +117,17 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () => _confirmReset(context, ref),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          _SectionHeader('Credits'),
+          Card(
+            child: ListTile(
+              title: const Text('Made by Shyam'),
+              subtitle: const Text('Open project repository'),
+              leading: const Icon(Icons.code_outlined),
+              trailing: const Icon(Icons.open_in_new, size: 18),
+              onTap: _openRepo,
             ),
           ),
           const SizedBox(height: 16),

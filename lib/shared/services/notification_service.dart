@@ -76,6 +76,13 @@ class NotificationService {
       onDidReceiveNotificationResponse: handleNotificationResponse,
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
+
+    // Handle notification action that launched the app from terminated state.
+    final launchDetails = await _notificationsPlugin.getNotificationAppLaunchDetails();
+    final launchResponse = launchDetails?.notificationResponse;
+    if (launchResponse != null) {
+      await handleNotificationResponse(launchResponse);
+    }
   }
 
   static Future<void> handleNotificationResponse(NotificationResponse response) async {
@@ -93,6 +100,12 @@ class NotificationService {
       payload,
       status: actionId == _actionPresent ? 'present' : 'absent',
     );
+
+    // Ensure tapped notification is dismissed immediately for action UX.
+    final id = response.id;
+    if (id != null) {
+      await _notificationsPlugin.cancel(id);
+    }
   }
 
   static Future<void> _markAttendanceFromPayload(
@@ -118,7 +131,15 @@ class NotificationService {
         return;
       }
 
-      final date = DateTime.now();
+      final classDateIso = decoded['classDate'] as String?;
+      final now = DateTime.now();
+      DateTime date = now;
+      if (classDateIso != null) {
+        final parsed = DateTime.tryParse(classDateIso);
+        if (parsed != null) {
+          date = parsed;
+        }
+      }
       final day = DateTime(date.year, date.month, date.day);
       AttendanceRecord? existing;
       for (final record in HiveService.attendance.values) {
@@ -161,6 +182,8 @@ class NotificationService {
           channelDescription: 'Confirmation for attendance actions from notifications',
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
+          autoCancel: true,
+          ongoing: false,
         ),
       );
       await _notificationsPlugin.show(
@@ -304,18 +327,20 @@ class NotificationService {
         channelDescription: 'Reminders for upcoming classes',
         importance: Importance.max,
         priority: Priority.high,
+        autoCancel: true,
+        ongoing: false,
         actions: <AndroidNotificationAction>[
           AndroidNotificationAction(
             _actionPresent,
             'Mark Present',
             cancelNotification: true,
-            showsUserInterface: false,
+            showsUserInterface: true,
           ),
           AndroidNotificationAction(
             _actionAbsent,
             'Mark Absent',
             cancelNotification: true,
-            showsUserInterface: false,
+            showsUserInterface: true,
           ),
         ],
       );
@@ -328,6 +353,7 @@ class NotificationService {
         'subjectName': subject.name,
         'weekday': entry.weekday,
         'startTime': entry.startTime,
+        'classDate': reminderTime.toIso8601String(),
       });
 
       await _notificationsPlugin.zonedSchedule(
