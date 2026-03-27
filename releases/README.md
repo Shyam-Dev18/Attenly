@@ -29,12 +29,12 @@ We provide different APK versions optimized for different device architectures:
 
 ### All Versions
 
-| Version | Architecture | File Size | Best For |
-|---------|-------------|-----------|----------|
-| attenly-v1.1.1-arm64.apk | ARM64 (v8) | 19 MB | Modern Android phones |
-| attenly-v1.1.1-armv7.apk | ARM v7 | 16.5 MB | Older Android devices |
-| attenly-v1.1.1-x86_64.apk | x86_64 | 20.5 MB | Emulators |
-| attenly-v1.0.0.apk | Universal | 57 MB | Fallback universal APK |
+| Version                   | Architecture | File Size | Best For               |
+| ------------------------- | ------------ | --------- | ---------------------- |
+| attenly-v1.1.1-arm64.apk  | ARM64 (v8)   | 19 MB     | Modern Android phones  |
+| attenly-v1.1.1-armv7.apk  | ARM v7       | 16.5 MB   | Older Android devices  |
+| attenly-v1.1.1-x86_64.apk | x86_64       | 20.5 MB   | Emulators              |
+| attenly-v1.0.0.apk        | Universal    | 57 MB     | Fallback universal APK |
 
 ### Installation Instructions
 
