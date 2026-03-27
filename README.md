@@ -49,7 +49,7 @@ The app provides optimized APKs for different device architectures:
 
 Direct download links:
 
-- [attenly-v1.1.1-arm64.apk](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-arm64.apk)
+- [attenly-v1.1.1-arm64.apk](https://github.com/Shyam-Dev18/Attenly/blob/main/releases/attenly-v1.1.1-arm64.apk)
 - [attenly-v1.1.1-armv7.apk](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-armv7.apk)
 - [attenly-v1.1.1-x86_64.apk](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-x86_64.apk)
 
