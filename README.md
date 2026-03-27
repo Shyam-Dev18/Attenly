@@ -37,7 +37,7 @@ Built natively with **Flutter** and utilizing **Hive NoSQL** for local persisten
 
 ### 🤖 Android (Recommended)
 
-**⭐ [Download Latest APK (ARM64)](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-arm64.apk)**
+**⭐ [Download Latest APK (ARM64)](https://github.com/Shyam-Dev18/Attenly/raw/main/attenly_app/releases/attenly-v1.1.1-arm64.apk)**
 
 The app provides optimized APKs for different device architectures:
 
@@ -49,9 +49,9 @@ The app provides optimized APKs for different device architectures:
 
 Direct download links:
 
-- [attenly-v1.1.1-arm64.apk](https://github.com/Shyam-Dev18/Attenly/blob/main/releases/attenly-v1.1.1-arm64.apk)
-- [attenly-v1.1.1-armv7.apk](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-armv7.apk)
-- [attenly-v1.1.1-x86_64.apk](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/main/attenly_app/releases/attenly-v1.1.1-x86_64.apk)
+- [attenly-v1.1.1-arm64.apk](https://github.com/Shyam-Dev18/Attenly/raw/main/releases/attenly-v1.1.1-arm64.apk)
+- [attenly-v1.1.1-armv7.apk](https://github.com/Shyam-Dev18/Attenly/raw/main/releases/attenly-v1.1.1-armv7.apk)
+- [attenly-v1.1.1-x86_64.apk](https://raw.githubusercontent.com/Shyam-Dev18/Attenly/raw/main/releases/attenly-v1.1.1-x86_64.apk)
 
 **For detailed installation instructions**, see [releases/README.md](releases/README.md)
 
