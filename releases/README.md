@@ -1,53 +1,159 @@
 # Attenly APK Releases
 
-## Version 1.1.1 - Optimized Split APKs
+## Download Latest Release
 
-We provide different APK versions optimized for different device architectures:
+⭐ **Get the latest version from [GitHub Releases](https://github.com/Shyam-Dev18/Attenly/releases)**
 
-### Recommended Downloads
+---
 
-- **ARM64 (`attenly-v1.1.1-arm64.apk`)** - **19 MB** ⭐ **RECOMMENDED**
-  - For most modern Android devices (99% of devices)
-  - Best performance and compatibility
-  - Download this if unsure
+## About Attenly App
 
-- **ARM v7 (`attenly-v1.1.1-armv7.apk`)** - 16.5 MB
-  - For older 32-bit Android devices
-  - Smallest file size
-  - Devices released before 2015
+**Attenly** is a smart offline attendance tracker for students. The app allows you to track your attendance offline and sync when connected.
 
-- **x86/x86_64 (`attenly-v1.1.1-x86_64.apk`)** - 20.5 MB
-  - For Android emulators and x86-based tablets
-  - Not for general use
+### Version Information
 
-### How to Determine Your Device Architecture
+- **Current Version**: 1.1.1
+- **Dart/Flutter**: 3.11.3+
+- **Build Type**: Release (optimized for production use)
 
-1. Open **Settings** → **About Phone**
-2. Look for "Processor" or "Chipset" info
-3. Most modern devices: **Qualcomm Snapdragon** or **MediaTek** (use ARM64)
-4. Older devices or x86: Check specific model specs
+---
 
-### All Versions
+## Installation Guide
 
-| Version                   | Architecture | File Size | Best For               |
-| ------------------------- | ------------ | --------- | ---------------------- |
-| attenly-v1.1.1-arm64.apk  | ARM64 (v8)   | 19 MB     | Modern Android phones  |
-| attenly-v1.1.1-armv7.apk  | ARM v7       | 16.5 MB   | Older Android devices  |
-| attenly-v1.1.1-x86_64.apk | x86_64       | 20.5 MB   | Emulators              |
-| attenly-v1.0.0.apk        | Universal    | 57 MB     | Fallback universal APK |
+### Step 1: Determine Your Device Architecture
 
-### Installation Instructions
+Run this in your Android device's terminal to check your processor:
 
-1. Download the appropriate APK for your device
-2. Enable "Unknown Sources" in Settings → Security
-3. Open the downloaded APK and tap "Install"
-4. Grant necessary permissions when prompted
+```bash
+getprop ro.product.cpu.abi
+```
 
-### Build Information
+Or open **Settings** → **About Phone** and check:
 
-- **Dart Version**: 3.11.3+
-- **Flutter Engine**: Optimized with code obfuscation
-- **Size Optimization**: R8 minification + resource shrinking + ABI splitting
+- **Snapdragon/MediaTek/Exynos**: Use **ARM64** (v8)
+- **Older devices**: Use **ARM v7** (32-bit)
+- **Android Emulator/Tablets (x86)**: Use **x86_64**
+
+### Step 2: Download the Correct APK
+
+| Architecture               | Download Link                                                            | Best For                          | File Size |
+| -------------------------- | ------------------------------------------------------------------------ | --------------------------------- | --------- |
+| **ARM64 (⭐ RECOMMENDED)** | [Latest Release](https://github.com/Shyam-Dev18/Attenly/releases/latest) | 99% of modern Android phones      | ~19 MB    |
+| **ARM v7**                 | [Latest Release](https://github.com/Shyam-Dev18/Attenly/releases/latest) | Older 32-bit Android devices      | ~16.5 MB  |
+| **x86_64**                 | [Latest Release](https://github.com/Shyam-Dev18/Attenly/releases/latest) | Android emulators and x86 tablets | ~20.5 MB  |
+
+### Step 3: Install the APK
+
+1. **Enable Unknown Sources** (if not already enabled):
+   - Settings → Apps & notifications (or Applications)
+   - Advanced → Special app access (or Unknown sources)
+   - Enable "Install unknown apps" for your file manager or browser
+
+2. **Open the APK File**:
+   - Locate the downloaded APK file
+   - Tap to open it
+   - Tap "Install" button
+
+3. **Grant Permissions**:
+   - The app will request permissions for storage, notifications, etc.
+   - Tap "Allow" to grant the necessary permissions
+
+4. **Open the App**:
+   - Once installed, tap "Open" or find "Attenly" in your app drawer
+
+---
+
+## What's Included
+
+✅ Offline attendance tracking  
+✅ Smart statistics and reports  
+✅ Local data storage (no cloud required)  
+✅ Export to Excel  
+✅ Lightweight (~20 MB)  
+✅ Optimized for all Android devices
+
+---
+
+## Build Information
+
+- **Optimization**: R8 code minification + resource shrinking
+- **ABI Splitting**: Separate optimized builds for each architecture
+- **Code Obfuscation**: Release build includes native code obfuscation
+- **Storage**: Uses Hive for local offline data storage
+
+---
+
+## Troubleshooting
+
+### "Not enough storage" error
+
+- Check available phone storage (need ~50 MB free)
+- Uninstall unused apps to free up space
+
+### "App not installed" error
+
+- Make sure you downloaded the correct architecture APK
+- Try re-downloading the APK file
+- Clear browser cache and try again
+
+### "Unknown app" warning
+
+- This is normal for APK files from unknown sources
+- Make sure you trust the download source
+- Tap "Install anyway" to proceed
+
+### App crashes on startup
+
+- Uninstall the app completely
+- Clear app cache: Settings → Apps → Attenly → Clear Cache
+- Reinstall the APK file
+
+---
+
+## Release History
+
+### Automated Releases
+
+All releases starting from **v1.1.1** are automatically built and published using GitHub Actions.
+
+**How releases are made:**
+
+1. Create a git tag: `git tag v1.x.x`
+2. Push the tag: `git push origin v1.x.x`
+3. GitHub Actions automatically:
+   - Builds the Flutter app in release mode
+   - Creates split APKs for each architecture
+   - Generates a GitHub Release
+   - Uploads all APKs as release assets
+
+You can download APKs from the [Releases page](https://github.com/Shyam-Dev18/Attenly/releases)
+
+---
+
+## FAQ
+
+**Q: Which APK should I download?**  
+A: If unsure, download the **ARM64** version (~19 MB) - it works on 99% of modern phones.
+
+**Q: Is my data safe?**  
+A: Yes! Attenly stores all data locally on your device. No data is sent to any server.
+
+**Q: What permissions does the app need?**  
+A: Storage (for exports) and Notifications (for reminders).
+
+**Q: Can I use the app offline?**  
+A: Yes! The app is fully functional offline. All attendance data is stored locally.
+
+---
+
+## Support
+
+For issues, feature requests, or bug reports, please create an issue on the [GitHub Issues page](https://github.com/Shyam-Dev18/Attenly/issues)
+
+---
+
+**Last Updated**: 2026 | Built with ❤️ using Flutter
+
 - **Signing**: Official signed release with RSA 2048-bit keystore
 
 ---
